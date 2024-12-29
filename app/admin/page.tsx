@@ -120,14 +120,22 @@ const AdminPage = () => {
   const [formData, setFormData] = useState<SiteContent>(content)
   const [isSaving, setIsSaving] = useState(false)
   const [saveStatus, setSaveStatus] = useState<'success' | 'error' | null>(null)
-  const { data: session, status } = useSession()
+  const session = useSession()
   const router = useRouter()
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
+    if (session.status === 'unauthenticated') {
       router.push('/admin/login')
     }
-  }, [status, router])
+  }, [session.status, router])
+
+  if (session.status === 'loading') {
+    return <div>Loading...</div>
+  }
+
+  if (!session.data) {
+    return null
+  }
 
   const handleSave = async () => {
     setIsSaving(true)
@@ -226,7 +234,7 @@ const AdminPage = () => {
                 {config.children && Object.entries(config.children).map(([childKey, childConfig]) => (
                   <div key={childKey} className="mb-4">
                     <label className="block text-sm font-medium text-gray-300 mb-1">
-                      {(childConfig.label as string)}
+                      {childConfig.label}
                     </label>
                     {renderField(childConfig, [...path, String(index), childKey], item[childKey])}
                   </div>
@@ -246,7 +254,7 @@ const AdminPage = () => {
               }}
               className="text-blue-400 hover:text-blue-300 px-3 py-2 rounded border border-blue-400 hover:border-blue-300"
             >
-              Add {(config.label as string)}
+              Add {config.label}
             </button>
           </div>
         )
@@ -257,7 +265,7 @@ const AdminPage = () => {
             {config.children && Object.entries(config.children).map(([childKey, childConfig]) => (
               <div key={childKey}>
                 <label className="block text-sm font-medium text-gray-300">
-                  {(childConfig.label as string)}
+                  {childConfig.label}
                 </label>
                 {renderField(
                   childConfig,
@@ -274,19 +282,11 @@ const AdminPage = () => {
     }
   }
 
-  if (status === 'loading') {
-    return <div>Loading...</div>
-  }
-
-  if (!session) {
-    return null
-  }
-
   return (
     <div className="min-h-screen bg-gray-900 py-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold text-white mb-8">
-          {(content.admin.title as string)}
+          Admin Panel
         </h1>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -303,7 +303,7 @@ const AdminPage = () => {
                       : 'text-gray-300 hover:bg-gray-700'
                   }`}
                 >
-                  {(config.label as string)}
+                  {config.label}
                 </button>
               ))}
             </nav>
@@ -315,7 +315,7 @@ const AdminPage = () => {
               renderField(
                 FIELD_CONFIG[activeSection],
                 [activeSection],
-                formData[activeSection as keyof SiteContent]
+                formData[activeSection]
               )
             )}
 
@@ -328,14 +328,14 @@ const AdminPage = () => {
                   isSaving ? 'bg-gray-600' : 'bg-blue-600 hover:bg-blue-700'
                 } text-white`}
               >
-                {isSaving ? 'Saving...' : (content.admin.saveButton as string)}
+                {isSaving ? 'Saving...' : 'Save Changes'}
               </button>
 
               {saveStatus && (
                 <p className={`text-sm ${saveStatus === 'success' ? 'text-green-400' : 'text-red-400'}`}>
                   {saveStatus === 'success' 
-                    ? (content.admin.saveSuccess as string)
-                    : (content.admin.saveError as string)}
+                    ? 'Changes saved successfully!'
+                    : 'Failed to save changes'}
                 </p>
               )}
             </div>
@@ -346,4 +346,6 @@ const AdminPage = () => {
   )
 }
 
-export default AdminPage 
+export default AdminPage
+
+export const dynamic = 'force-dynamic'
