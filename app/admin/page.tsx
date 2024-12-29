@@ -13,17 +13,19 @@ export default function AdminPanel() {
   }
 
   const renderSection = (section: string, data: Record<string, unknown>, parentPath = '') => {
+    if (!data || typeof data !== 'object') return null;
+
     return Object.entries(data).map(([key, value]) => {
       const currentPath = parentPath ? `${parentPath}.${key}` : key
 
-      if (typeof value === 'object' && !Array.isArray(value) && !(value instanceof File)) {
+      if (value && typeof value === 'object' && !Array.isArray(value) && !(value instanceof File)) {
         return (
           <div key={key} className="mb-8">
             <h3 className="text-lg font-semibold text-gray-700 mb-4 capitalize">
               {key.replace(/([A-Z])/g, ' $1').trim()}
             </h3>
             <div className="space-y-4 pl-4 border-l-2 border-gray-200">
-              {renderSection(section, value, currentPath)}
+              {renderSection(section, value as Record<string, unknown>, currentPath)}
             </div>
           </div>
         )

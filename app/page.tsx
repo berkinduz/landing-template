@@ -1,7 +1,6 @@
 'use client'
 
 import Image from 'next/image'
-import Link from 'next/link'
 import { useContent } from '@/contexts/ContentContext'
 
 export default function Home() {
@@ -24,13 +23,6 @@ export default function Home() {
             {hero.title}
           </h1>
           <p className="text-2xl mb-12 text-gray-200">{hero.subtitle}</p>
-          <Link 
-            href="/membership" 
-            className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full text-lg font-semibold 
-            hover:scale-105 transition-all duration-300 inline-block hover:shadow-lg hover:shadow-blue-500/30"
-          >
-            {hero.ctaButton}
-          </Link>
         </div>
       </section>
 
@@ -120,8 +112,8 @@ const ContactInfo = () => {
 
   return (
     <div className="bg-gray-800 p-8 rounded-xl">
-      <h3 className="text-2xl font-bold mb-6 text-white">Get in Touch</h3>
-      <p className="mb-8 text-gray-300">Have questions or want to learn more about our gym? Don't hesitate to reach out!</p>
+      <h3 className="text-2xl font-bold mb-6 text-white">{contactInfo.title}</h3>
+      <p className="mb-8 text-gray-300">{contactInfo.description}</p>
       <div className="space-y-4">
         <p className="flex items-center text-gray-300">
           <LocationIcon className="w-6 h-6 mr-4 text-blue-400" />
