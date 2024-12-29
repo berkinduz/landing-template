@@ -3,13 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useContent } from '@/contexts/ContentContext'
-import MenuIcon from './icons/MenuIcon'
-
-// Add type definition at the top
-type NavigationLink = {
-  name: string
-  href: string
-}
+import { MenuIcon } from '@/components/icons/MenuIcon'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
