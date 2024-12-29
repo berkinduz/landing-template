@@ -1,6 +1,6 @@
 export const siteContent = {
   "general": {
-    "siteName": "Fitness Gym",
+    "siteName": "Fitness Gym | Berkin",
     "siteDescription": "Your ultimate fitness destination",
     "metadata": {
       "title": "Fitness Gym App",
