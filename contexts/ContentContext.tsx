@@ -3,35 +3,19 @@
 import { createContext, useContext, useState } from 'react'
 import { siteContent, type SiteContent } from '@/config/siteContent'
 
-interface ContentContextType {
+export const ContentContext = createContext<{
   content: SiteContent
-  updateContent: (path: string, value: any) => void
-}
-
-const ContentContext = createContext<ContentContextType>({
+  updateContent: (newContent: SiteContent) => void
+}>({
   content: siteContent,
-  updateContent: () => {}
+  updateContent: () => {},
 })
 
-export function ContentProvider({ children }: { children: React.ReactNode }) {
+export const ContentProvider = ({ children }: { children: React.ReactNode }) => {
   const [content, setContent] = useState<SiteContent>(siteContent)
 
-  const updateContent = (path: string, value: any) => {
-    setContent(prevContent => {
-      const newContent = { ...prevContent }
-      const pathArray = path.split('.')
-      let current: any = newContent
-      
-      // Navigate to the nested property
-      for (let i = 0; i < pathArray.length - 1; i++) {
-        current = current[pathArray[i]]
-      }
-      
-      // Update the value
-      current[pathArray[pathArray.length - 1]] = value
-      
-      return newContent
-    })
+  const updateContent = (newContent: SiteContent) => {
+    setContent(newContent)
   }
 
   return (
