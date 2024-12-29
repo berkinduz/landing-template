@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useContent } from '@/contexts/ContentContext'
-import MenuIcon from '../components/icons/MenuIcon'
+import MenuIcon from './icons/MenuIcon'
 
 // Add type definition at the top
 type NavigationLink = {
