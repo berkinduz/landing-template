@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useContent } from '@/contexts/ContentContext'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import { SiteContent } from '@/config/siteContent'
 
 type FieldConfig = {
   label: string
@@ -115,8 +116,8 @@ const FIELD_CONFIG: Record<string, FieldConfig> = {
 
 const AdminPage = () => {
   const { content, updateContent } = useContent()
-  const [activeSection, setActiveSection] = useState('general')
-  const [formData, setFormData] = useState(content)
+  const [activeSection, setActiveSection] = useState<keyof SiteContent>('general')
+  const [formData, setFormData] = useState<SiteContent>(content)
   const [isSaving, setIsSaving] = useState(false)
   const [saveStatus, setSaveStatus] = useState<'success' | 'error' | null>(null)
   const { data: session, status } = useSession()
@@ -151,26 +152,26 @@ const AdminPage = () => {
     }
   }
 
-  const updateField = (path: string[], value: any) => {
+  const handleChange = (path: string[], value: unknown) => {
     setFormData(prev => {
       const newData = { ...prev }
-      let current = newData
+      let current = newData as Record<string, unknown>
       for (let i = 0; i < path.length - 1; i++) {
-        current = current[path[i]]
+        current = current[path[i]] as Record<string, unknown>
       }
       current[path[path.length - 1]] = value
       return newData
     })
   }
 
-  const renderField = (config: FieldConfig, path: string[], value: any) => {
+  const renderField = (config: FieldConfig, path: string[], value: unknown) => {
     switch (config.type) {
       case 'text':
         return (
           <input
             type="text"
-            value={value || ''}
-            onChange={(e) => updateField(path, e.target.value)}
+            value={(value as string) || ''}
+            onChange={(e) => handleChange(path, e.target.value)}
             className="mt-1 block w-full rounded-md bg-gray-700 border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-white p-2"
           />
         )
@@ -178,8 +179,8 @@ const AdminPage = () => {
       case 'textarea':
         return (
           <textarea
-            value={value || ''}
-            onChange={(e) => updateField(path, e.target.value)}
+            value={(value as string) || ''}
+            onChange={(e) => handleChange(path, e.target.value)}
             className="mt-1 block w-full rounded-md bg-gray-700 border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-white p-2"
             rows={3}
           />
@@ -190,11 +191,11 @@ const AdminPage = () => {
           <div className="space-y-2">
             <input
               type="text"
-              value={value || ''}
-              onChange={(e) => updateField(path, e.target.value)}
+              value={(value as string) || ''}
+              onChange={(e) => handleChange(path, e.target.value)}
               className="mt-1 block w-full rounded-md bg-gray-700 border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-white p-2"
             />
-            {value && (
+            {typeof value === 'string' && value && (
               <img
                 src={value}
                 alt="Preview"
@@ -207,15 +208,15 @@ const AdminPage = () => {
       case 'array':
         return (
           <div className="space-y-4">
-            {Array.isArray(value) && value.map((item, index) => (
+            {(Array.isArray(value) ? value : []).map((item, index) => (
               <div key={index} className="p-4 bg-gray-700 rounded-lg border border-gray-600">
                 <div className="flex justify-between items-center mb-2">
                   <h4 className="text-white font-medium">{config.label} {index + 1}</h4>
                   <button
                     onClick={() => {
-                      const newArray = [...value]
+                      const newArray = [...(Array.isArray(value) ? value : [])]
                       newArray.splice(index, 1)
-                      updateField(path, newArray)
+                      handleChange(path, newArray)
                     }}
                     className="text-red-400 hover:text-red-300 px-2 py-1 rounded border border-red-400 hover:border-red-300"
                   >
@@ -225,26 +226,27 @@ const AdminPage = () => {
                 {config.children && Object.entries(config.children).map(([childKey, childConfig]) => (
                   <div key={childKey} className="mb-4">
                     <label className="block text-sm font-medium text-gray-300 mb-1">
-                      {childConfig.label}
+                      {(childConfig.label as string)}
                     </label>
-                    {renderField(childConfig, [...path, index, childKey], item[childKey])}
+                    {renderField(childConfig, [...path, String(index), childKey], item[childKey])}
                   </div>
                 ))}
               </div>
             ))}
             <button
               onClick={() => {
-                const newItem = {}
-                if (config.children) {
-                  Object.keys(config.children).forEach(key => {
-                    newItem[key] = config.children[key].type === 'array' ? [] : ''
+                const newItem: Record<string, any> = {}
+                const children = config.children
+                if (children) {
+                  Object.keys(children).forEach(key => {
+                    newItem[key] = children[key].type === 'array' ? [] : ''
                   })
                 }
-                updateField(path, [...(value || []), newItem])
+                handleChange(path, [...(Array.isArray(value) ? value : []), newItem])
               }}
               className="text-blue-400 hover:text-blue-300 px-3 py-2 rounded border border-blue-400 hover:border-blue-300"
             >
-              Add {config.label}
+              Add {(config.label as string)}
             </button>
           </div>
         )
@@ -255,9 +257,13 @@ const AdminPage = () => {
             {config.children && Object.entries(config.children).map(([childKey, childConfig]) => (
               <div key={childKey}>
                 <label className="block text-sm font-medium text-gray-300">
-                  {childConfig.label}
+                  {(childConfig.label as string)}
                 </label>
-                {renderField(childConfig, [...path, childKey], value?.[childKey])}
+                {renderField(
+                  childConfig,
+                  [...path, childKey],
+                  (value as Record<string, unknown>)?.[childKey]
+                )}
               </div>
             ))}
           </div>
@@ -280,7 +286,7 @@ const AdminPage = () => {
     <div className="min-h-screen bg-gray-900 py-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold text-white mb-8">
-          {content.admin.title}
+          {(content.admin.title as string)}
         </h1>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -290,14 +296,14 @@ const AdminPage = () => {
               {Object.entries(FIELD_CONFIG).map(([key, config]) => (
                 <button
                   key={key}
-                  onClick={() => setActiveSection(key)}
+                  onClick={() => setActiveSection(key as keyof SiteContent)}
                   className={`w-full text-left px-4 py-2 rounded ${
                     activeSection === key
                       ? 'bg-blue-600 text-white'
                       : 'text-gray-300 hover:bg-gray-700'
                   }`}
                 >
-                  {config.label}
+                  {(config.label as string)}
                 </button>
               ))}
             </nav>
@@ -309,7 +315,7 @@ const AdminPage = () => {
               renderField(
                 FIELD_CONFIG[activeSection],
                 [activeSection],
-                formData[activeSection]
+                formData[activeSection as keyof SiteContent]
               )
             )}
 
@@ -319,21 +325,17 @@ const AdminPage = () => {
                 onClick={handleSave}
                 disabled={isSaving}
                 className={`px-4 py-2 rounded ${
-                  isSaving
-                    ? 'bg-gray-600'
-                    : 'bg-blue-600 hover:bg-blue-700'
+                  isSaving ? 'bg-gray-600' : 'bg-blue-600 hover:bg-blue-700'
                 } text-white`}
               >
-                {isSaving ? 'Saving...' : content.admin.saveButton}
+                {isSaving ? 'Saving...' : (content.admin.saveButton as string)}
               </button>
 
               {saveStatus && (
-                <p className={`text-sm ${
-                  saveStatus === 'success' ? 'text-green-400' : 'text-red-400'
-                }`}>
+                <p className={`text-sm ${saveStatus === 'success' ? 'text-green-400' : 'text-red-400'}`}>
                   {saveStatus === 'success' 
-                    ? content.admin.saveSuccess 
-                    : content.admin.saveError}
+                    ? (content.admin.saveSuccess as string)
+                    : (content.admin.saveError as string)}
                 </p>
               )}
             </div>
