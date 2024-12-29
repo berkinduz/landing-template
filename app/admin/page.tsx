@@ -12,7 +12,7 @@ export default function AdminPanel() {
     updateContent(path, value)
   }
 
-  const renderSection = (section: string, data: any, parentPath = '') => {
+  const renderSection = (section: string, data: Record<string, unknown>, parentPath = '') => {
     return Object.entries(data).map(([key, value]) => {
       const currentPath = parentPath ? `${parentPath}.${key}` : key
 
